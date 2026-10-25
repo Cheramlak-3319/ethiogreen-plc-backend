@@ -2,43 +2,29 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateUserRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * @return array<string, mixed>
      */
     public function rules(): array
     {
-        return [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|unique:users,email,' . $this->user->id,
-            'password' => 'required|string'
-        ];
-    }
+        $user = $this->route('user');
 
-    public function message(): array{
-        return[
-        'name.required' => 'the name field is required',
-        'name.string' => 'the name field must be string',
-        'name.max' => 'the name char can not be more than 255',
-        'email.string' => 'the email type is must be string',
-        'email.required' => 'the email field is required',
-        'email.unique' => 'the email field is already in use',
-        'password.required' => 'password is required',
-        'password.string' => 'password must be string',
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user?->id)],
+            'phone' => ['nullable', 'string', 'max:32'],
+            'role' => ['nullable', 'in:admin,manager,staff,customer'],
+            'password' => ['nullable', 'string', 'min:8'],
         ];
     }
 }

@@ -2,33 +2,38 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateProductRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * @return array<string, mixed>
      */
     public function rules(): array
     {
+        $product = $this->route('product');
+
         return [
-        'name' => 'required|string|max:255',
-        'slug' => 'required|string|unique:products,slug,' . $this->route('product')->id,
-        'description' => 'nullable|string',
-        'short_description' => 'nullable|string',
-        'price' => 'required|numeric|min:0',
-        'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+            'category_id' => ['nullable', 'exists:categories,id'],
+            'name' => ['required', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255', Rule::unique('products', 'slug')->ignore($product?->id)],
+            'sku' => ['nullable', 'string', 'max:100', Rule::unique('products', 'sku')->ignore($product?->id)],
+            'description' => ['nullable', 'string'],
+            'short_description' => ['nullable', 'string', 'max:500'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'cost_price' => ['nullable', 'numeric', 'min:0'],
+            'stock_quantity' => ['nullable', 'integer', 'min:0'],
+            'reorder_level' => ['nullable', 'integer', 'min:0'],
+            'unit' => ['nullable', 'string', 'max:32'],
+            'is_active' => ['boolean'],
+            'is_featured' => ['boolean'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ];
     }
 }

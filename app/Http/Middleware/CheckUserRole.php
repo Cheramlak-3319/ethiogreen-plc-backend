@@ -9,15 +9,16 @@ use Symfony\Component\HttpFoundation\Response;
 class CheckUserRole
 {
     /**
-     * Handle an incoming request.
-     *
      * @param  Closure(Request): (Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        if($request->user()?->role !== "admin"){
-            abort(403, "Unauthorized");
+        $user = $request->user();
+
+        if ($user === null || ! in_array($user->role?->value, $roles, true)) {
+            abort(403, 'You do not have access to this area.');
         }
+
         return $next($request);
     }
 }
